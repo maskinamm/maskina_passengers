@@ -1,4 +1,4 @@
-// ===== ОСНОВНАЯ ВЕРСИЯ - БЕЗ ЭМОДЗИ, ВСЁ РАБОТАЕТ =====
+// ===== ОСНОВНАЯ ВЕРСИЯ - С МИКРОАНИМАЦИЯМИ =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Запуск...');
     
@@ -20,6 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
             birthDate: '1985-05-15', 
             phone: '+79001234567', 
             email: 'ivanov@mail.ru', 
+            role: 'user' 
+        },
+        { 
+            login: 'petrov2026', 
+            password: 'password123', 
+            fullName: 'Петров Петр Петрович', 
+            birthDate: '1990-03-20', 
+            phone: '+79007654321', 
+            email: 'petrov@mail.ru', 
             role: 'user' 
         }
     ];
@@ -208,17 +217,17 @@ function initLogin() {
         var user = findUser(login);
         
         if (!user) {
-            message.innerHTML = '<div class="alert alert-danger">Пользователь с таким логином не найден.</div>';
+            message.innerHTML = '<div class="alert alert-danger fade-in-up">Пользователь с таким логином не найден.</div>';
             return;
         }
         
         if (user.password !== password) {
-            message.innerHTML = '<div class="alert alert-danger">Неверный пароль.</div>';
+            message.innerHTML = '<div class="alert alert-danger fade-in-up">Неверный пароль.</div>';
             return;
         }
         
         saveUserToSession(user);
-        message.innerHTML = '<div class="alert alert-success">Вход выполнен успешно!</div>';
+        message.innerHTML = '<div class="alert alert-success fade-in-up">Вход выполнен успешно!</div>';
         
         setTimeout(function() {
             if (user.role === 'admin') {
@@ -280,7 +289,7 @@ function initRegister() {
         if (!email) errors.push('Введите e-mail.');
         
         if (errors.length > 0) {
-            message.innerHTML = '<div class="alert alert-danger">' + errors.join('<br>') + '</div>';
+            message.innerHTML = '<div class="alert alert-danger fade-in-up">' + errors.join('<br>') + '</div>';
             return;
         }
         
@@ -296,7 +305,7 @@ function initRegister() {
         });
         localStorage.setItem('users', JSON.stringify(users));
         
-        message.innerHTML = '<div class="alert alert-success">Регистрация успешна! Теперь вы можете <a href="login.html">войти</a>.</div>';
+        message.innerHTML = '<div class="alert alert-success fade-in-up">Регистрация успешна! Теперь вы можете <a href="login.html">войти</a>.</div>';
         form.reset();
     });
 }
@@ -341,9 +350,14 @@ function initProfile() {
         var feedbackModal = new bootstrap.Modal(feedbackModalElement);
         
         function updateFeedbackSelect() {
-            var apps = getApplications().filter(function(a) {
+            var allApps = getApplications();
+            console.log('Все заявки:', allApps);
+            
+            var apps = allApps.filter(function(a) {
                 return a.userId === user.login && a.status === 'Обучение завершено' && !a.feedback;
             });
+            
+            console.log('Доступно для отзыва:', apps);
             
             feedbackSelect.innerHTML = '<option value="">Выберите заявку</option>';
             
@@ -357,22 +371,29 @@ function initProfile() {
             if (apps.length === 0) {
                 feedbackBtn.disabled = true;
                 feedbackBtn.title = 'Нет завершённых заявок без отзыва';
+                console.log('Кнопка отзыва ОТКЛЮЧЕНА');
             } else {
                 feedbackBtn.disabled = false;
+                console.log('Кнопка отзыва ВКЛЮЧЕНА');
             }
         }
         
         updateFeedbackSelect();
         
         feedbackBtn.addEventListener('click', function() {
+            console.log('Кнопка отзыва нажата');
             if (feedbackSelect.options.length > 1) {
                 feedbackModal.show();
+            } else {
+                alert('Нет доступных заявок для отзыва.');
             }
         });
         
         saveFeedbackBtn.addEventListener('click', function() {
             var appId = feedbackSelect.value;
             var text = feedbackText.value.trim();
+            
+            console.log('Сохранение отзыва. appId:', appId, 'text:', text);
             
             if (!appId || !text) {
                 alert('Выберите заявку и введите текст отзыва.');
@@ -396,9 +417,14 @@ function initProfile() {
                 updateFeedbackSelect();
                 feedbackText.value = '';
                 var msg = document.getElementById('feedbackMessage');
-                if (msg) msg.innerHTML = '<div class="alert alert-success">Отзыв сохранён!</div>';
+                if (msg) msg.innerHTML = '<div class="alert alert-success fade-in-up">Отзыв сохранён!</div>';
+                console.log('Отзыв сохранён!');
+            } else {
+                alert('Ошибка: заявка не найдена.');
             }
         });
+    } else {
+        console.log('Модальное окно feedbackModal не найдено!');
     }
 }
 
@@ -410,14 +436,14 @@ function showApplications(userLogin) {
     
     if (apps.length === 0) {
         container.innerHTML = 
-            '<div class="text-center py-4">' +
+            '<div class="text-center py-4 fade-in-up">' +
                 '<p class="text-muted">У вас пока нет заявок.</p>' +
                 '<a href="application.html" class="btn btn-primary">Подать заявку</a>' +
             '</div>';
         return;
     }
     
-    var html = '<div class="table-responsive"><table class="table table-striped"><thead><tr>' +
+    var html = '<div class="table-responsive"><table class="table table-striped table-row-hover"><thead><tr>' +
         '<th>Транспорт</th>' +
         '<th>Дата</th>' +
         '<th>Оплата</th>' +
@@ -428,12 +454,13 @@ function showApplications(userLogin) {
     for (var i = 0; i < apps.length; i++) {
         var a = apps[i];
         var statusClass = a.status === 'Новая' ? 'secondary' : a.status === 'Идет обучение' ? 'warning' : 'success';
-        html += '<tr>' +
+        var feedbackText = a.feedback || '—';
+        html += '<tr class="fade-in-up-delay-' + ((i % 4) + 1) + '">' +
             '<td><strong>' + a.transport + '</strong></td>' +
             '<td>' + a.date + '</td>' +
             '<td>' + a.payment + '</td>' +
             '<td><span class="badge bg-' + statusClass + '">' + a.status + '</span></td>' +
-            '<td>' + (a.feedback || '—') + '</td>' +
+            '<td>' + feedbackText + '</td>' +
             '</tr>';
     }
     
@@ -467,11 +494,11 @@ function initAdmin() {
     var apps = getApplications();
     
     if (apps.length === 0) {
-        container.innerHTML = '<p class="text-muted">Нет заявок</p>';
+        container.innerHTML = '<p class="text-muted fade-in-up">Нет заявок</p>';
         return;
     }
     
-    var html = '<div class="table-responsive"><table class="table table-striped"><thead><tr>' +
+    var html = '<div class="table-responsive"><table class="table table-striped table-row-hover"><thead><tr>' +
         '<th>Пользователь</th>' +
         '<th>Транспорт</th>' +
         '<th>Дата</th>' +
@@ -486,7 +513,7 @@ function initAdmin() {
         var userName = userFound ? userFound.fullName : a.userId;
         var statusClass = a.status === 'Новая' ? 'secondary' : a.status === 'Идет обучение' ? 'warning' : 'success';
         
-        html += '<tr>' +
+        html += '<tr class="fade-in-up-delay-' + ((i % 4) + 1) + '">' +
             '<td><strong>' + userName + '</strong></td>' +
             '<td>' + a.transport + '</td>' +
             '<td>' + a.date + '</td>' +
@@ -533,10 +560,10 @@ function initAdmin() {
     }
 }
 
-// ===== УВЕДОМЛЕНИЯ =====
+// ===== УВЕДОМЛЕНИЯ С МИКРОАНИМАЦИЕЙ =====
 function showNotification(message) {
     var alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    alertDiv.className = 'alert alert-success alert-dismissible fade show notification-slide position-fixed top-0 end-0 m-3';
     alertDiv.style.zIndex = 1050;
     alertDiv.style.borderRadius = '12px';
     alertDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
@@ -579,7 +606,7 @@ function initApplication() {
         var payment = document.getElementById('payment').value;
         
         if (!transport || !date || !payment) {
-            message.innerHTML = '<div class="alert alert-danger">Заполните все поля.</div>';
+            message.innerHTML = '<div class="alert alert-danger fade-in-up">Заполните все поля.</div>';
             return;
         }
         
@@ -595,7 +622,7 @@ function initApplication() {
         });
         setApplications(apps);
         
-        message.innerHTML = '<div class="alert alert-success">Заявка успешно отправлена!</div>';
+        message.innerHTML = '<div class="alert alert-success fade-in-up">Заявка успешно отправлена!</div>';
         form.reset();
     });
 }
@@ -614,13 +641,13 @@ function initIndex() {
         var buttonText = (user.role === 'admin') ? 'Перейти в админку' : 'Перейти в профиль';
         
         welcome.innerHTML = 
-            '<div class="alert alert-success">' +
+            '<div class="alert alert-success fade-in-up">' +
                 'Добро пожаловать, ' + user.fullName + '! ' +
                 '<a href="' + buttonUrl + '" class="btn btn-primary btn-sm ms-2">' + buttonText + '</a>' +
             '</div>';
     } else {
         welcome.innerHTML = 
-            '<div class="alert alert-info">' +
+            '<div class="alert alert-info fade-in-up">' +
                 'Добро пожаловать на портал "Пассажирам.РФ". ' +
                 '<a href="login.html" class="btn btn-primary btn-sm ms-2">Войти</a>' +
                 '<a href="register.html" class="btn btn-outline-primary btn-sm ms-2">Зарегистрироваться</a>' +
