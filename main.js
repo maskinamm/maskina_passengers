@@ -96,24 +96,23 @@ function generateId() {
 
 // ===== СЛАЙДЕР =====
 function initSlider() {
+    var slidesWrapper = document.querySelector('.slider-slides');
     var slides = document.querySelectorAll('.slider-slide');
     var dots = document.querySelectorAll('.slider-dot');
     var prevBtn = document.querySelector('.slider-btn.prev');
     var nextBtn = document.querySelector('.slider-btn.next');
     var currentSlide = 0;
+    var totalSlides = slides.length;
     var autoSlideInterval;
 
-    if (slides.length === 0) return;
+    if (!slidesWrapper || totalSlides === 0) return;
 
     function goToSlide(index) {
-        if (index < 0) index = slides.length - 1;
-        if (index >= slides.length) index = 0;
+        if (index < 0) index = totalSlides - 1;
+        if (index >= totalSlides) index = 0;
         currentSlide = index;
         
-        var wrapper = document.querySelector('.slider-slides');
-        if (wrapper) {
-            wrapper.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
-        }
+        slidesWrapper.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
         
         for (var i = 0; i < dots.length; i++) {
             if (i === currentSlide) {
@@ -145,14 +144,16 @@ function initSlider() {
     }
 
     if (prevBtn) {
-        prevBtn.addEventListener('click', function() {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             prevSlide();
             startAutoSlide();
         });
     }
     
     if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             nextSlide();
             startAutoSlide();
         });
@@ -191,7 +192,6 @@ function initLogin() {
         return;
     }
     
-    // Очищаем поля
     var loginInput = document.getElementById('login');
     var passwordInput = document.getElementById('password');
     if (loginInput) loginInput.value = '';
@@ -239,7 +239,6 @@ function initRegister() {
     
     if (!form) return;
     
-    // ОЧИЩАЕМ ВСЕ ПОЛЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
     var loginInput = document.getElementById('login');
     var passwordInput = document.getElementById('password');
     var fullNameInput = document.getElementById('fullName');
@@ -253,8 +252,6 @@ function initRegister() {
     if (birthDateInput) birthDateInput.value = '';
     if (phoneInput) phoneInput.value = '';
     if (emailInput) emailInput.value = '';
-    
-    console.log('Поля регистрации очищены');
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -316,7 +313,6 @@ function initProfile() {
         return;
     }
     
-    // ЕСЛИ АДМИН - ПЕРЕНАПРАВЛЯЕМ В АДМИНКУ
     if (user.role === 'admin') {
         console.log('Админ пытается зайти в профиль, перенаправляем в админку');
         window.location.href = 'admin.html';
@@ -325,20 +321,16 @@ function initProfile() {
     
     console.log('Пользователь найден:', user.fullName);
     
-    // Запускаем слайдер
     initSlider();
     
-    // Показываем имя
     var nameElement = document.getElementById('userName');
     if (nameElement) {
         nameElement.textContent = user.fullName;
         console.log('Имя отображено');
     }
     
-    // Показываем заявки
     showApplications(user.login);
     
-    // Обработчики для отзывов
     var feedbackBtn = document.getElementById('feedbackBtn');
     var feedbackSelect = document.getElementById('feedbackAppSelect');
     var feedbackText = document.getElementById('feedbackText');
@@ -513,7 +505,6 @@ function initAdmin() {
     html += '</tbody></table></div>';
     container.innerHTML = html;
     
-    // Обработчики изменения статуса
     var selects = document.querySelectorAll('.status-change');
     for (var i = 0; i < selects.length; i++) {
         selects[i].addEventListener('change', function(e) {
@@ -536,7 +527,6 @@ function initAdmin() {
         });
     }
     
-    // Выход
     var adminLogout = document.getElementById('adminLogout');
     if (adminLogout) {
         adminLogout.addEventListener('click', logout);
@@ -570,7 +560,6 @@ function initApplication() {
         return;
     }
     
-    // ЕСЛИ АДМИН - ПЕРЕНАПРАВЛЯЕМ В АДМИНКУ
     if (user.role === 'admin') {
         console.log('Админ пытается подать заявку, перенаправляем в админку');
         window.location.href = 'admin.html';
@@ -581,9 +570,6 @@ function initApplication() {
     var message = document.getElementById('applicationMessage');
     
     if (!form) return;
-    
-    // Очищаем форму при загрузке
-    form.reset();
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
