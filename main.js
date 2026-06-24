@@ -230,6 +230,80 @@ function initLogin() {
     });
 }
 
+// ===== РЕГИСТРАЦИЯ =====
+function initRegister() {
+    console.log('Страница регистрации');
+    
+    var form = document.getElementById('registerForm');
+    var message = document.getElementById('registerMessage');
+    
+    if (!form) return;
+    
+    // ОЧИЩАЕМ ВСЕ ПОЛЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+    var loginInput = document.getElementById('login');
+    var passwordInput = document.getElementById('password');
+    var fullNameInput = document.getElementById('fullName');
+    var birthDateInput = document.getElementById('birthDate');
+    var phoneInput = document.getElementById('phone');
+    var emailInput = document.getElementById('email');
+    
+    if (loginInput) loginInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (fullNameInput) fullNameInput.value = '';
+    if (birthDateInput) birthDateInput.value = '';
+    if (phoneInput) phoneInput.value = '';
+    if (emailInput) emailInput.value = '';
+    
+    console.log('Поля регистрации очищены');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var login = document.getElementById('login').value.trim();
+        var password = document.getElementById('password').value;
+        var fullName = document.getElementById('fullName').value.trim();
+        var birthDate = document.getElementById('birthDate').value;
+        var phone = document.getElementById('phone').value.trim();
+        var email = document.getElementById('email').value.trim();
+        
+        var errors = [];
+        
+        if (!login || login.length < 6 || !/^[A-Za-z0-9]+$/.test(login)) {
+            errors.push('Логин должен содержать только латинские буквы и цифры, минимум 6 символов.');
+        }
+        if (findUser(login)) {
+            errors.push('Пользователь с таким логином уже существует.');
+        }
+        if (!password || password.length < 8) {
+            errors.push('Пароль должен быть не менее 8 символов.');
+        }
+        if (!fullName) errors.push('Введите ФИО.');
+        if (!birthDate) errors.push('Введите дату рождения.');
+        if (!phone) errors.push('Введите номер телефона.');
+        if (!email) errors.push('Введите e-mail.');
+        
+        if (errors.length > 0) {
+            message.innerHTML = '<div class="alert alert-danger">' + errors.join('<br>') + '</div>';
+            return;
+        }
+        
+        var users = getUsers();
+        users.push({ 
+            login: login, 
+            password: password, 
+            fullName: fullName, 
+            birthDate: birthDate, 
+            phone: phone, 
+            email: email, 
+            role: 'user' 
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        message.innerHTML = '<div class="alert alert-success">Регистрация успешна! Теперь вы можете <a href="login.html">войти</a>.</div>';
+        form.reset();
+    });
+}
+
 // ===== ПРОФИЛЬ =====
 function initProfile() {
     console.log('Страница профиля');
@@ -239,6 +313,13 @@ function initProfile() {
     if (!user) {
         console.log('Нет пользователя, перенаправление на логин');
         window.location.href = 'login.html';
+        return;
+    }
+    
+    // ЕСЛИ АДМИН - ПЕРЕНАПРАВЛЯЕМ В АДМИНКУ
+    if (user.role === 'admin') {
+        console.log('Админ пытается зайти в профиль, перенаправляем в админку');
+        window.location.href = 'admin.html';
         return;
     }
     
@@ -489,10 +570,20 @@ function initApplication() {
         return;
     }
     
+    // ЕСЛИ АДМИН - ПЕРЕНАПРАВЛЯЕМ В АДМИНКУ
+    if (user.role === 'admin') {
+        console.log('Админ пытается подать заявку, перенаправляем в админку');
+        window.location.href = 'admin.html';
+        return;
+    }
+    
     var form = document.getElementById('applicationForm');
     var message = document.getElementById('applicationMessage');
     
     if (!form) return;
+    
+    // Очищаем форму при загрузке
+    form.reset();
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -523,63 +614,6 @@ function initApplication() {
     });
 }
 
-// ===== РЕГИСТРАЦИЯ =====
-function initRegister() {
-    console.log('Страница регистрации');
-    
-    var form = document.getElementById('registerForm');
-    var message = document.getElementById('registerMessage');
-    
-    if (!form) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        var login = document.getElementById('login').value.trim();
-        var password = document.getElementById('password').value;
-        var fullName = document.getElementById('fullName').value.trim();
-        var birthDate = document.getElementById('birthDate').value;
-        var phone = document.getElementById('phone').value.trim();
-        var email = document.getElementById('email').value.trim();
-        
-        var errors = [];
-        
-        if (!login || login.length < 6 || !/^[A-Za-z0-9]+$/.test(login)) {
-            errors.push('Логин должен содержать только латинские буквы и цифры, минимум 6 символов.');
-        }
-        if (findUser(login)) {
-            errors.push('Пользователь с таким логином уже существует.');
-        }
-        if (!password || password.length < 8) {
-            errors.push('Пароль должен быть не менее 8 символов.');
-        }
-        if (!fullName) errors.push('Введите ФИО.');
-        if (!birthDate) errors.push('Введите дату рождения.');
-        if (!phone) errors.push('Введите номер телефона.');
-        if (!email) errors.push('Введите e-mail.');
-        
-        if (errors.length > 0) {
-            message.innerHTML = '<div class="alert alert-danger">' + errors.join('<br>') + '</div>';
-            return;
-        }
-        
-        var users = getUsers();
-        users.push({ 
-            login: login, 
-            password: password, 
-            fullName: fullName, 
-            birthDate: birthDate, 
-            phone: phone, 
-            email: email, 
-            role: 'user' 
-        });
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        message.innerHTML = '<div class="alert alert-success">Регистрация успешна! Теперь вы можете <a href="login.html">войти</a>.</div>';
-        form.reset();
-    });
-}
-
 // ===== ГЛАВНАЯ =====
 function initIndex() {
     console.log('Главная страница');
@@ -590,10 +624,13 @@ function initIndex() {
     if (!welcome) return;
     
     if (user) {
+        var buttonUrl = (user.role === 'admin') ? 'admin.html' : 'profile.html';
+        var buttonText = (user.role === 'admin') ? 'Перейти в админку' : 'Перейти в профиль';
+        
         welcome.innerHTML = 
             '<div class="alert alert-success">' +
                 'Добро пожаловать, ' + user.fullName + '! ' +
-                '<a href="profile.html" class="btn btn-primary btn-sm ms-2">Перейти в профиль</a>' +
+                '<a href="' + buttonUrl + '" class="btn btn-primary btn-sm ms-2">' + buttonText + '</a>' +
             '</div>';
     } else {
         welcome.innerHTML = 
