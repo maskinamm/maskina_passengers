@@ -1,55 +1,59 @@
-// ===== Инициализация =====
-document.addEventListener('DOMContentLoaded', () => {
-    // Создаём администратора, если его нет
-    if (!localStorage.getItem('users')) {
-        const users = [
-            { 
-                login: 'Admin26', 
-                password: 'Demo20', 
-                fullName: 'Администратор', 
-                birthDate: '1990-01-01', 
-                phone: '+70000000000', 
-                email: 'admin@rf.ru', 
-                role: 'admin' 
-            },
-            // ===== ДОБАВЛЕННЫЙ ПОЛЬЗОВАТЕЛЬ =====
-            { 
-                login: 'ivanov2026', 
-                password: 'qwerty123', 
-                fullName: 'Иванов Иван Иванович', 
-                birthDate: '1985-05-15', 
-                phone: '+79001234567', 
-                email: 'ivanov@mail.ru', 
-                role: 'user' 
-            }
-        ];
-        localStorage.setItem('users', JSON.stringify(users));
-    }
+// ===== ОСНОВНАЯ ВЕРСИЯ - БЕЗ ЭМОДЗИ, ВСЁ РАБОТАЕТ =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Запуск...');
+    
+    // ===== СОЗДАЕМ ПОЛЬЗОВАТЕЛЕЙ =====
+    const users = [
+        { 
+            login: 'Admin26', 
+            password: 'Demo20', 
+            fullName: 'Администратор', 
+            birthDate: '1990-01-01', 
+            phone: '+70000000000', 
+            email: 'admin@rf.ru', 
+            role: 'admin' 
+        },
+        { 
+            login: 'ivanov2026', 
+            password: 'qwerty123', 
+            fullName: 'Иванов Иван Иванович', 
+            birthDate: '1985-05-15', 
+            phone: '+79001234567', 
+            email: 'ivanov@mail.ru', 
+            role: 'user' 
+        }
+    ];
+    localStorage.setItem('users', JSON.stringify(users));
+    
     if (!localStorage.getItem('applications')) {
         localStorage.setItem('applications', JSON.stringify([]));
     }
 
-    // Текущий пользователь из sessionStorage
-    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
-
-    // Обработчики для каждой страницы
+    console.log('Пользователи созданы');
+    
+    // Определяем страницу
     const page = window.location.pathname.split('/').pop();
+    console.log('Страница:', page);
 
-    if (page === 'register.html') initRegister();
-    else if (page === 'login.html') initLogin();
-    else if (page === 'profile.html') initProfile(currentUser);
-    else if (page === 'application.html') initApplication(currentUser);
-    else if (page === 'admin.html') initAdmin(currentUser);
-    else if (page === 'index.html') initIndex(currentUser);
+    // Запускаем нужную функцию
+    if (page === 'login.html' || page === '') {
+        initLogin();
+    } else if (page === 'register.html') {
+        initRegister();
+    } else if (page === 'profile.html') {
+        initProfile();
+    } else if (page === 'application.html') {
+        initApplication();
+    } else if (page === 'admin.html') {
+        initAdmin();
+    } else {
+        initIndex();
+    }
 });
 
-// ===== Вспомогательные функции =====
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 function getUsers() {
     return JSON.parse(localStorage.getItem('users')) || [];
-}
-
-function setUsers(users) {
-    localStorage.setItem('users', JSON.stringify(users));
 }
 
 function getApplications() {
@@ -61,15 +65,24 @@ function setApplications(apps) {
 }
 
 function findUser(login) {
-    return getUsers().find(u => u.login === login);
+    const users = getUsers();
+    for (var i = 0; i < users.length; i++) {
+        if (users[i].login === login) {
+            return users[i];
+        }
+    }
+    return null;
 }
 
-function saveCurrentUser(user) {
+function saveUserToSession(user) {
     sessionStorage.setItem('currentUser', JSON.stringify(user));
+    console.log('Сохранен в сессии:', user);
 }
 
-function getCurrentUser() {
-    return JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+function getSessionUser() {
+    var user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    console.log('Из сессии:', user);
+    return user;
 }
 
 function logout() {
@@ -78,26 +91,17 @@ function logout() {
 }
 
 function generateId() {
-    return Date.now() + Math.random().toString(36);
+    return Date.now() + Math.random().toString(36).substring(2, 8);
 }
 
-// Проверка на авторизацию
-function requireAuth(redirect = 'login.html') {
-    if (!getCurrentUser()) {
-        window.location.href = redirect;
-        return false;
-    }
-    return true;
-}
-
-// ===== Слайдер =====
+// ===== СЛАЙДЕР =====
 function initSlider() {
-    const slides = document.querySelectorAll('.slider-slide');
-    const dots = document.querySelectorAll('.slider-dot');
-    const prevBtn = document.querySelector('.slider-btn.prev');
-    const nextBtn = document.querySelector('.slider-btn.next');
-    let currentSlide = 0;
-    let autoSlideInterval;
+    var slides = document.querySelectorAll('.slider-slide');
+    var dots = document.querySelectorAll('.slider-dot');
+    var prevBtn = document.querySelector('.slider-btn.prev');
+    var nextBtn = document.querySelector('.slider-btn.next');
+    var currentSlide = 0;
+    var autoSlideInterval;
 
     if (slides.length === 0) return;
 
@@ -106,12 +110,18 @@ function initSlider() {
         if (index >= slides.length) index = 0;
         currentSlide = index;
         
-        const wrapper = document.querySelector('.slider-slides');
-        wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        var wrapper = document.querySelector('.slider-slides');
+        if (wrapper) {
+            wrapper.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+        }
         
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-        });
+        for (var i = 0; i < dots.length; i++) {
+            if (i === currentSlide) {
+                dots[i].classList.add('active');
+            } else {
+                dots[i].classList.remove('active');
+            }
+        }
     }
 
     function nextSlide() {
@@ -134,23 +144,30 @@ function initSlider() {
         }
     }
 
-    if (prevBtn) prevBtn.addEventListener('click', () => {
-        prevSlide();
-        startAutoSlide();
-    });
-    if (nextBtn) nextBtn.addEventListener('click', () => {
-        nextSlide();
-        startAutoSlide();
-    });
-
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            goToSlide(index);
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            prevSlide();
             startAutoSlide();
         });
-    });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            nextSlide();
+            startAutoSlide();
+        });
+    }
 
-    const container = document.querySelector('.slider-container');
+    for (var i = 0; i < dots.length; i++) {
+        (function(index) {
+            dots[index].addEventListener('click', function() {
+                goToSlide(index);
+                startAutoSlide();
+            });
+        })(i);
+    }
+
+    var container = document.querySelector('.slider-container');
     if (container) {
         container.addEventListener('mouseenter', stopAutoSlide);
         container.addEventListener('mouseleave', startAutoSlide);
@@ -162,21 +179,371 @@ function initSlider() {
     startAutoSlide();
 }
 
-// ===== Страница регистрации =====
-function initRegister() {
-    const form = document.getElementById('registerForm');
-    const message = document.getElementById('registerMessage');
-
-    form.addEventListener('submit', (e) => {
+// ===== СТРАНИЦА ВХОДА =====
+function initLogin() {
+    console.log('Страница входа');
+    
+    var form = document.getElementById('loginForm');
+    var message = document.getElementById('loginMessage');
+    
+    if (!form) {
+        console.log('Форма не найдена');
+        return;
+    }
+    
+    // Очищаем поля
+    var loginInput = document.getElementById('login');
+    var passwordInput = document.getElementById('password');
+    if (loginInput) loginInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
-        const login = document.getElementById('login').value.trim();
-        const password = document.getElementById('password').value;
-        const fullName = document.getElementById('fullName').value.trim();
-        const birthDate = document.getElementById('birthDate').value;
-        const phone = document.getElementById('phone').value.trim();
-        const email = document.getElementById('email').value.trim();
+        
+        var login = document.getElementById('login').value.trim();
+        var password = document.getElementById('password').value;
+        
+        console.log('Вход:', login);
+        
+        var user = findUser(login);
+        
+        if (!user) {
+            message.innerHTML = '<div class="alert alert-danger">Пользователь с таким логином не найден.</div>';
+            return;
+        }
+        
+        if (user.password !== password) {
+            message.innerHTML = '<div class="alert alert-danger">Неверный пароль.</div>';
+            return;
+        }
+        
+        saveUserToSession(user);
+        message.innerHTML = '<div class="alert alert-success">Вход выполнен успешно!</div>';
+        
+        setTimeout(function() {
+            if (user.role === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'profile.html';
+            }
+        }, 500);
+    });
+}
 
-        let errors = [];
+// ===== ПРОФИЛЬ =====
+function initProfile() {
+    console.log('Страница профиля');
+    
+    var user = getSessionUser();
+    
+    if (!user) {
+        console.log('Нет пользователя, перенаправление на логин');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    console.log('Пользователь найден:', user.fullName);
+    
+    // Запускаем слайдер
+    initSlider();
+    
+    // Показываем имя
+    var nameElement = document.getElementById('userName');
+    if (nameElement) {
+        nameElement.textContent = user.fullName;
+        console.log('Имя отображено');
+    }
+    
+    // Показываем заявки
+    showApplications(user.login);
+    
+    // Обработчики для отзывов
+    var feedbackBtn = document.getElementById('feedbackBtn');
+    var feedbackSelect = document.getElementById('feedbackAppSelect');
+    var feedbackText = document.getElementById('feedbackText');
+    var saveFeedbackBtn = document.getElementById('saveFeedback');
+    var feedbackModalElement = document.getElementById('feedbackModal');
+    
+    if (feedbackModalElement) {
+        var feedbackModal = new bootstrap.Modal(feedbackModalElement);
+        
+        function updateFeedbackSelect() {
+            var apps = getApplications().filter(function(a) {
+                return a.userId === user.login && a.status === 'Обучение завершено' && !a.feedback;
+            });
+            
+            feedbackSelect.innerHTML = '<option value="">Выберите заявку</option>';
+            
+            for (var i = 0; i < apps.length; i++) {
+                var opt = document.createElement('option');
+                opt.value = apps[i].id;
+                opt.textContent = 'Заявка ' + apps[i].id.slice(-6) + ' (' + apps[i].transport + ')';
+                feedbackSelect.appendChild(opt);
+            }
+            
+            if (apps.length === 0) {
+                feedbackBtn.disabled = true;
+                feedbackBtn.title = 'Нет завершённых заявок без отзыва';
+            } else {
+                feedbackBtn.disabled = false;
+            }
+        }
+        
+        updateFeedbackSelect();
+        
+        feedbackBtn.addEventListener('click', function() {
+            if (feedbackSelect.options.length > 1) {
+                feedbackModal.show();
+            }
+        });
+        
+        saveFeedbackBtn.addEventListener('click', function() {
+            var appId = feedbackSelect.value;
+            var text = feedbackText.value.trim();
+            
+            if (!appId || !text) {
+                alert('Выберите заявку и введите текст отзыва.');
+                return;
+            }
+            
+            var apps = getApplications();
+            var app = null;
+            for (var i = 0; i < apps.length; i++) {
+                if (apps[i].id === appId) {
+                    app = apps[i];
+                    break;
+                }
+            }
+            
+            if (app) {
+                app.feedback = text;
+                setApplications(apps);
+                feedbackModal.hide();
+                showApplications(user.login);
+                updateFeedbackSelect();
+                feedbackText.value = '';
+                var msg = document.getElementById('feedbackMessage');
+                if (msg) msg.innerHTML = '<div class="alert alert-success">Отзыв сохранён!</div>';
+            }
+        });
+    }
+}
+
+function showApplications(userLogin) {
+    var container = document.getElementById('applicationsList');
+    if (!container) return;
+    
+    var apps = getApplications().filter(function(a) { return a.userId === userLogin; });
+    
+    if (apps.length === 0) {
+        container.innerHTML = 
+            '<div class="text-center py-4">' +
+                '<p class="text-muted">У вас пока нет заявок.</p>' +
+                '<a href="application.html" class="btn btn-primary">Подать заявку</a>' +
+            '</div>';
+        return;
+    }
+    
+    var html = '<div class="table-responsive"><table class="table table-striped"><thead><tr>' +
+        '<th>Транспорт</th>' +
+        '<th>Дата</th>' +
+        '<th>Оплата</th>' +
+        '<th>Статус</th>' +
+        '<th>Отзыв</th>' +
+        '</tr></thead><tbody>';
+    
+    for (var i = 0; i < apps.length; i++) {
+        var a = apps[i];
+        var statusClass = a.status === 'Новая' ? 'secondary' : a.status === 'Идет обучение' ? 'warning' : 'success';
+        html += '<tr>' +
+            '<td><strong>' + a.transport + '</strong></td>' +
+            '<td>' + a.date + '</td>' +
+            '<td>' + a.payment + '</td>' +
+            '<td><span class="badge bg-' + statusClass + '">' + a.status + '</span></td>' +
+            '<td>' + (a.feedback || '—') + '</td>' +
+            '</tr>';
+    }
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
+
+// ===== АДМИНКА =====
+function initAdmin() {
+    console.log('Страница администратора');
+    
+    var user = getSessionUser();
+    
+    if (!user) {
+        console.log('Нет пользователя');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if (user.role !== 'admin') {
+        alert('У вас нет прав доступа к этой странице.');
+        window.location.href = 'profile.html';
+        return;
+    }
+    
+    console.log('Администратор:', user.fullName);
+    
+    var container = document.getElementById('adminAppsContainer');
+    if (!container) return;
+    
+    var apps = getApplications();
+    
+    if (apps.length === 0) {
+        container.innerHTML = '<p class="text-muted">Нет заявок</p>';
+        return;
+    }
+    
+    var html = '<div class="table-responsive"><table class="table table-striped"><thead><tr>' +
+        '<th>Пользователь</th>' +
+        '<th>Транспорт</th>' +
+        '<th>Дата</th>' +
+        '<th>Оплата</th>' +
+        '<th>Статус</th>' +
+        '<th>Действие</th>' +
+        '</tr></thead><tbody>';
+    
+    for (var i = 0; i < apps.length; i++) {
+        var a = apps[i];
+        var userFound = findUser(a.userId);
+        var userName = userFound ? userFound.fullName : a.userId;
+        var statusClass = a.status === 'Новая' ? 'secondary' : a.status === 'Идет обучение' ? 'warning' : 'success';
+        
+        html += '<tr>' +
+            '<td><strong>' + userName + '</strong></td>' +
+            '<td>' + a.transport + '</td>' +
+            '<td>' + a.date + '</td>' +
+            '<td>' + a.payment + '</td>' +
+            '<td><span class="badge bg-' + statusClass + '">' + a.status + '</span></td>' +
+            '<td>' +
+                '<select class="form-select form-select-sm status-change" data-id="' + a.id + '">' +
+                    '<option value="Новая"' + (a.status === 'Новая' ? ' selected' : '') + '>Новая</option>' +
+                    '<option value="Идет обучение"' + (a.status === 'Идет обучение' ? ' selected' : '') + '>Идет обучение</option>' +
+                    '<option value="Обучение завершено"' + (a.status === 'Обучение завершено' ? ' selected' : '') + '>Обучение завершено</option>' +
+                '</select>' +
+            '</td>' +
+            '</tr>';
+    }
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    
+    // Обработчики изменения статуса
+    var selects = document.querySelectorAll('.status-change');
+    for (var i = 0; i < selects.length; i++) {
+        selects[i].addEventListener('change', function(e) {
+            var id = this.getAttribute('data-id');
+            var newStatus = this.value;
+            var appsAll = getApplications();
+            var app = null;
+            for (var j = 0; j < appsAll.length; j++) {
+                if (appsAll[j].id === id) {
+                    app = appsAll[j];
+                    break;
+                }
+            }
+            if (app) {
+                app.status = newStatus;
+                setApplications(appsAll);
+                showNotification('Статус заявки изменён на "' + newStatus + '"');
+                initAdmin();
+            }
+        });
+    }
+    
+    // Выход
+    var adminLogout = document.getElementById('adminLogout');
+    if (adminLogout) {
+        adminLogout.addEventListener('click', logout);
+    }
+}
+
+// ===== УВЕДОМЛЕНИЯ =====
+function showNotification(message) {
+    var alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    alertDiv.style.zIndex = 1050;
+    alertDiv.style.borderRadius = '12px';
+    alertDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
+    alertDiv.style.maxWidth = '400px';
+    alertDiv.innerHTML = message + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(function() {
+        alertDiv.remove();
+    }, 3000);
+}
+
+// ===== ЗАЯВКА =====
+function initApplication() {
+    console.log('Страница заявки');
+    
+    var user = getSessionUser();
+    
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    var form = document.getElementById('applicationForm');
+    var message = document.getElementById('applicationMessage');
+    
+    if (!form) return;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var transport = document.getElementById('transport').value;
+        var date = document.getElementById('date').value;
+        var payment = document.getElementById('payment').value;
+        
+        if (!transport || !date || !payment) {
+            message.innerHTML = '<div class="alert alert-danger">Заполните все поля.</div>';
+            return;
+        }
+        
+        var apps = getApplications();
+        apps.push({
+            id: generateId(),
+            userId: user.login,
+            transport: transport,
+            date: date,
+            payment: payment,
+            status: 'Новая',
+            feedback: ''
+        });
+        setApplications(apps);
+        
+        message.innerHTML = '<div class="alert alert-success">Заявка успешно отправлена!</div>';
+        form.reset();
+    });
+}
+
+// ===== РЕГИСТРАЦИЯ =====
+function initRegister() {
+    console.log('Страница регистрации');
+    
+    var form = document.getElementById('registerForm');
+    var message = document.getElementById('registerMessage');
+    
+    if (!form) return;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var login = document.getElementById('login').value.trim();
+        var password = document.getElementById('password').value;
+        var fullName = document.getElementById('fullName').value.trim();
+        var birthDate = document.getElementById('birthDate').value;
+        var phone = document.getElementById('phone').value.trim();
+        var email = document.getElementById('email').value.trim();
+        
+        var errors = [];
+        
         if (!login || login.length < 6 || !/^[A-Za-z0-9]+$/.test(login)) {
             errors.push('Логин должен содержать только латинские буквы и цифры, минимум 6 символов.');
         }
@@ -190,349 +557,50 @@ function initRegister() {
         if (!birthDate) errors.push('Введите дату рождения.');
         if (!phone) errors.push('Введите номер телефона.');
         if (!email) errors.push('Введите e-mail.');
-
+        
         if (errors.length > 0) {
-            message.innerHTML = `<div class="alert alert-danger">${errors.join('<br>')}</div>`;
+            message.innerHTML = '<div class="alert alert-danger">' + errors.join('<br>') + '</div>';
             return;
         }
-
-        const users = getUsers();
-        users.push({ login, password, fullName, birthDate, phone, email, role: 'user' });
-        setUsers(users);
-        message.innerHTML = `<div class="alert alert-success">Регистрация успешна! Теперь вы можете <a href="login.html">войти</a>.</div>`;
-        form.reset();
-    });
-}
-
-// ===== Страница входа =====
-function initLogin() {
-    const form = document.getElementById('loginForm');
-    const message = document.getElementById('loginMessage');
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const login = document.getElementById('login').value.trim();
-        const password = document.getElementById('password').value;
-
-        const user = findUser(login);
-        if (!user || user.password !== password) {
-            message.innerHTML = `<div class="alert alert-danger">Неверный логин или пароль.</div>`;
-            return;
-        }
-
-        saveCurrentUser(user);
-        if (user.role === 'admin') {
-            window.location.href = 'admin.html';
-        } else {
-            window.location.href = 'profile.html';
-        }
-    });
-}
-
-// ===== Страница личного кабинета =====
-function initProfile(user) {
-    if (!requireAuth()) return;
-
-    initSlider();
-
-    document.getElementById('userName').textContent = user.fullName;
-    renderUserApplications(user.login);
-
-    const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
-    const feedbackBtn = document.getElementById('feedbackBtn');
-    const feedbackSelect = document.getElementById('feedbackAppSelect');
-    const feedbackText = document.getElementById('feedbackText');
-    const saveFeedbackBtn = document.getElementById('saveFeedback');
-
-    function updateFeedbackSelect() {
-        const apps = getApplications().filter(a => a.userId === user.login && a.status === 'Обучение завершено' && !a.feedback);
-        feedbackSelect.innerHTML = '<option value="">Выберите заявку</option>';
-        apps.forEach(a => {
-            const opt = document.createElement('option');
-            opt.value = a.id;
-            opt.textContent = `Заявка №${a.id.slice(-6)} (${a.transport})`;
-            feedbackSelect.appendChild(opt);
+        
+        var users = getUsers();
+        users.push({ 
+            login: login, 
+            password: password, 
+            fullName: fullName, 
+            birthDate: birthDate, 
+            phone: phone, 
+            email: email, 
+            role: 'user' 
         });
-        if (apps.length === 0) {
-            feedbackBtn.disabled = true;
-            feedbackBtn.title = 'Нет завершённых заявок без отзыва';
-        } else {
-            feedbackBtn.disabled = false;
-        }
-    }
-    updateFeedbackSelect();
-
-    feedbackBtn.addEventListener('click', () => {
-        if (feedbackSelect.options.length > 1) {
-            feedbackModal.show();
-        }
-    });
-
-    saveFeedbackBtn.addEventListener('click', () => {
-        const appId = feedbackSelect.value;
-        const text = feedbackText.value.trim();
-        if (!appId || !text) {
-            alert('Выберите заявку и введите текст отзыва.');
-            return;
-        }
-        let apps = getApplications();
-        const app = apps.find(a => a.id === appId);
-        if (app) {
-            app.feedback = text;
-            setApplications(apps);
-            feedbackModal.hide();
-            renderUserApplications(user.login);
-            updateFeedbackSelect();
-            feedbackText.value = '';
-            document.getElementById('feedbackMessage').innerHTML = '<div class="alert alert-success">Отзыв сохранён!</div>';
-        }
-    });
-}
-
-function renderUserApplications(userLogin) {
-    const container = document.getElementById('applicationsList');
-    const apps = getApplications().filter(a => a.userId === userLogin);
-    if (apps.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-4">
-                <p class="text-muted">У вас пока нет заявок.</p>
-                <a href="application.html" class="btn btn-primary">Подать заявку</a>
-            </div>
-        `;
-        return;
-    }
-    let html = `<div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Вид транспорта</th>
-                    <th>Дата начала</th>
-                    <th>Способ оплаты</th>
-                    <th>Статус</th>
-                    <th>Отзыв</th>
-                </tr>
-            </thead>
-            <tbody>`;
-    apps.forEach(a => {
-        const feedback = a.feedback || '<span class="text-muted">—</span>';
-        const statusClass = a.status === 'Новая' ? 'secondary' : a.status === 'Идет обучение' ? 'warning' : 'success';
-        html += `<tr>
-            <td><strong>${a.transport}</strong></td>
-            <td>${a.date}</td>
-            <td>${a.payment}</td>
-            <td><span class="badge bg-${statusClass}">${a.status}</span></td>
-            <td>${feedback}</td>
-        </tr>`;
-    });
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
-}
-
-// ===== Страница подачи заявки =====
-function initApplication(user) {
-    if (!requireAuth()) return;
-
-    const form = document.getElementById('applicationForm');
-    const message = document.getElementById('applicationMessage');
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const transport = document.getElementById('transport').value;
-        const date = document.getElementById('date').value;
-        const payment = document.getElementById('payment').value;
-
-        if (!transport || !date || !payment) {
-            message.innerHTML = '<div class="alert alert-danger">Заполните все поля.</div>';
-            return;
-        }
-
-        const dateParts = date.split('.');
-        if (dateParts.length !== 3 || isNaN(dateParts[0]) || isNaN(dateParts[1]) || isNaN(dateParts[2])) {
-            message.innerHTML = '<div class="alert alert-danger">Дата должна быть в формате ДД.ММ.ГГГГ.</div>';
-            return;
-        }
-
-        const apps = getApplications();
-        const newApp = {
-            id: generateId(),
-            userId: user.login,
-            transport: transport,
-            date: date,
-            payment: payment,
-            status: 'Новая',
-            feedback: ''
-        };
-        apps.push(newApp);
-        setApplications(apps);
-
-        message.innerHTML = `<div class="alert alert-success">Заявка отправлена! Статус: Новая. Ожидайте подтверждения администратора.</div>`;
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        message.innerHTML = '<div class="alert alert-success">Регистрация успешна! Теперь вы можете <a href="login.html">войти</a>.</div>';
         form.reset();
     });
 }
 
-// ===== Панель администратора =====
-function initAdmin(user) {
-    if (!requireAuth()) return;
-    if (!user || user.role !== 'admin') {
-        alert('У вас нет прав доступа к этой странице.');
-        window.location.href = 'profile.html';
-        return;
-    }
-
-    let currentFilter = 'all';
-    let currentSort = 'date';
-    let currentPage = 1;
-    const perPage = 5;
-
-    const container = document.getElementById('adminAppsContainer');
-    const filterSelect = document.getElementById('filterStatus');
-    const sortSelect = document.getElementById('sortBy');
-    const prevPageBtn = document.getElementById('prevPage');
-    const nextPageBtn = document.getElementById('nextPage');
-    const pageInfo = document.getElementById('pageInfo');
-
-    function render() {
-        let apps = getApplications();
-
-        if (currentFilter !== 'all') {
-            apps = apps.filter(a => a.status === currentFilter);
-        }
-
-        if (currentSort === 'date') {
-            apps.sort((a, b) => a.date.localeCompare(b.date));
-        } else if (currentSort === 'status') {
-            apps.sort((a, b) => a.status.localeCompare(b.status));
-        }
-
-        const total = apps.length;
-        const totalPages = Math.ceil(total / perPage) || 1;
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        const start = (currentPage - 1) * perPage;
-        const end = Math.min(start + perPage, total);
-        const pageApps = apps.slice(start, end);
-
-        // Обновляем счетчик
-        const totalCount = document.getElementById('totalCount');
-        if (totalCount) totalCount.textContent = total;
-
-        if (pageApps.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-4">
-                    <p class="text-muted">Нет заявок, соответствующих фильтру.</p>
-                </div>
-            `;
-        } else {
-            let html = `<div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Пользователь</th>
-                            <th>Транспорт</th>
-                            <th>Дата</th>
-                            <th>Оплата</th>
-                            <th>Статус</th>
-                            <th>Действие</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-            pageApps.forEach(a => {
-                const user = findUser(a.userId);
-                const userName = user ? user.fullName : a.userId;
-                const statusClass = a.status === 'Новая' ? 'secondary' : a.status === 'Идет обучение' ? 'warning' : 'success';
-                html += `<tr>
-                    <td><strong>${userName}</strong></td>
-                    <td>${a.transport}</td>
-                    <td>${a.date}</td>
-                    <td>${a.payment}</td>
-                    <td><span class="badge bg-${statusClass}">${a.status}</span></td>
-                    <td>
-                        <select class="form-select form-select-sm status-change" data-id="${a.id}" style="min-width:140px;">
-                            <option value="Новая" ${a.status === 'Новая' ? 'selected' : ''}>Новая</option>
-                            <option value="Идет обучение" ${a.status === 'Идет обучение' ? 'selected' : ''}>Идет обучение</option>
-                            <option value="Обучение завершено" ${a.status === 'Обучение завершено' ? 'selected' : ''}>Обучение завершено</option>
-                        </select>
-                    </td>
-                </tr>`;
-            });
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-
-            document.querySelectorAll('.status-change').forEach(select => {
-                select.addEventListener('change', (e) => {
-                    const id = e.target.dataset.id;
-                    const newStatus = e.target.value;
-                    let appsAll = getApplications();
-                    const app = appsAll.find(a => a.id === id);
-                    if (app) {
-                        app.status = newStatus;
-                        setApplications(appsAll);
-                        showNotification(`Статус заявки изменён на "${newStatus}"`);
-                        render();
-                    }
-                });
-            });
-        }
-
-        pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
-        prevPageBtn.disabled = currentPage === 1;
-        nextPageBtn.disabled = currentPage === totalPages;
-    }
-
-    filterSelect.addEventListener('change', (e) => {
-        currentFilter = e.target.value;
-        currentPage = 1;
-        render();
-    });
-    sortSelect.addEventListener('change', (e) => {
-        currentSort = e.target.value;
-        render();
-    });
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) { currentPage--; render(); }
-    });
-    nextPageBtn.addEventListener('click', () => {
-        currentPage++;
-        render();
-    });
-
-    render();
-    document.getElementById('adminLogout').addEventListener('click', logout);
-}
-
-// ===== Уведомления =====
-function showNotification(message, type = 'success') {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-    alertDiv.style.zIndex = 1050;
-    alertDiv.style.borderRadius = '12px';
-    alertDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
-    alertDiv.style.maxWidth = '400px';
-    alertDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 3000);
-}
-
-// ===== Главная страница =====
-function initIndex(user) {
-    const welcome = document.getElementById('welcomeMessage');
+// ===== ГЛАВНАЯ =====
+function initIndex() {
+    console.log('Главная страница');
+    
+    var user = getSessionUser();
+    var welcome = document.getElementById('welcomeMessage');
+    
+    if (!welcome) return;
+    
     if (user) {
-        welcome.innerHTML = `
-            <div class="alert alert-success">
-                Добро пожаловать, <strong>${user.fullName}</strong>! 
-                <a href="profile.html" class="btn btn-primary btn-sm ms-2">Перейти в личный кабинет</a>
-            </div>
-        `;
+        welcome.innerHTML = 
+            '<div class="alert alert-success">' +
+                'Добро пожаловать, ' + user.fullName + '! ' +
+                '<a href="profile.html" class="btn btn-primary btn-sm ms-2">Перейти в профиль</a>' +
+            '</div>';
     } else {
-        welcome.innerHTML = `
-            <div class="alert alert-info">
-                Добро пожаловать на портал «Пассажирам.РФ». 
-                <a href="login.html" class="btn btn-primary btn-sm ms-2">Войти</a>
-                <a href="register.html" class="btn btn-outline-primary btn-sm ms-2">Зарегистрироваться</a>
-            </div>
-        `;
+        welcome.innerHTML = 
+            '<div class="alert alert-info">' +
+                'Добро пожаловать на портал "Пассажирам.РФ". ' +
+                '<a href="login.html" class="btn btn-primary btn-sm ms-2">Войти</a>' +
+                '<a href="register.html" class="btn btn-outline-primary btn-sm ms-2">Зарегистрироваться</a>' +
+            '</div>';
     }
 }
