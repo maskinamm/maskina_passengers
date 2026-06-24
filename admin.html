@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Пассажирам.РФ</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Главная</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="admin.html">Админка</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" id="adminLogout">Выход</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="fade-in-up">
+            <h2>Панель администратора</h2>
+            <p class="lead">Управление заявками на обучение</p>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="form-label">Фильтр по статусу</label>
+                    <select class="form-select" id="filterStatus">
+                        <option value="all">Все заявки</option>
+                        <option value="Новая">Новая</option>
+                        <option value="Идет обучение">Идет обучение</option>
+                        <option value="Обучение завершено">Обучение завершено</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Сортировка</label>
+                    <select class="form-select" id="sortBy">
+                        <option value="date">По дате</option>
+                        <option value="status">По статусу</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <span class="text-muted">Всего заявок: <strong id="totalCount">0</strong></span>
+                </div>
+            </div>
+
+            <div id="adminAppsContainer"></div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" id="prevPage">
+                        <a class="page-link" href="#" aria-label="Предыдущая">‹</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link" id="pageInfo">Страница 1 из 1</span>
+                    </li>
+                    <li class="page-item" id="nextPage">
+                        <a class="page-link" href="#" aria-label="Следующая">›</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

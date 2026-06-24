@@ -16,7 +16,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.html">Главная</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Главная</a></li>
                     <li class="nav-item"><a class="nav-link" href="login.html">Вход</a></li>
                     <li class="nav-item"><a class="nav-link" href="register.html">Регистрация</a></li>
                 </ul>
@@ -25,27 +25,63 @@
     </nav>
 
     <div class="container mt-4">
-        <h1>Добро пожаловать на портал «Пассажирам.РФ»</h1>
-        <p class="lead">Обучение водителей пассажирским перевозкам: автобус, электробус, трамвай.</p>
-        <div id="welcomeMessage" class="mt-3"></div>
+        <div class="text-center mb-5 fade-in-up">
+            <h1>Пассажирам.РФ</h1>
+            <p class="lead">Обучение водителей пассажирским перевозкам</p>
+            <p>Автобус • Электробус • Трамвай</p>
+            <div id="welcomeMessage" class="mt-3"></div>
+        </div>
 
-        <div class="row mt-5">
+        <div class="row g-4">
             <div class="col-md-6">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-header">Для пользователей</div>
-                    <div class="card-body">
-                        <p>Подайте заявку на обучение, выберите вид транспорта и удобную дату.</p>
-                        <a href="register.html" class="btn btn-primary">Зарегистрироваться</a>
-                        <a href="login.html" class="btn btn-outline-primary ms-2">Войти</a>
+                    <div class="card-body text-center py-4">
+                        <p class="fs-5">Подайте заявку на обучение</p>
+                        <p class="text-muted">Выберите вид транспорта и удобную дату</p>
+                        <div class="mt-3">
+                            <a href="register.html" class="btn btn-primary">Зарегистрироваться</a>
+                            <a href="login.html" class="btn btn-outline-primary ms-2">Войти</a>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-header">Для администратора</div>
+                    <div class="card-body text-center py-4">
+                        <p class="fs-5">Управляйте заявками</p>
+                        <p class="text-muted">Меняйте статусы и следите за процессом</p>
+                        <div class="mt-3">
+                            <a href="login.html" class="btn btn-dark">Войти как администратор</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5 g-4">
+            <div class="col-md-4">
+                <div class="card text-center p-3">
                     <div class="card-body">
-                        <p>Управляйте заявками, меняйте статусы и следите за процессом обучения.</p>
-                        <a href="login.html" class="btn btn-dark">Войти как администратор</a>
+                        <h3>Автобус</h3>
+                        <p class="text-muted">Обучение вождению городских автобусов</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-3">
+                    <div class="card-body">
+                        <h3>Электробус</h3>
+                        <p class="text-muted">Современные экологичные электробусы</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-3">
+                    <div class="card-body">
+                        <h3>Трамвай</h3>
+                        <p class="text-muted">Классический городской транспорт</p>
                     </div>
                 </div>
             </div>
